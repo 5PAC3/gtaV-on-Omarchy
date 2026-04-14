@@ -1,0 +1,43 @@
+{
+  "9d2d0eb64d5c44529cece33fe2a46482": {
+    "autoInstallDxvk": true,
+    "autoInstallDxvkNvapi": true,
+    "autoInstallVkd3d": true,
+    "preferSystemLibs": false,
+    "enableEsync": false,
+    "enableMsync": false,
+    "enableFsync": false,
+    "enableWineWayland": false,
+    "enableHDR": false,
+    "enableWoW64": false,
+    "nvidiaPrime": false,
+    "offlineMode": true,
+    "enviromentOptions": [
+      {
+        "key": "USE_FAKE_EPIC_EXE",
+        "value": "true"
+      }
+    ],
+    "wrapperOptions": [],
+    "showFps": false,
+    "targetExe": "/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTAV/PlayGTAV.exe",
+    "useGameMode": false,
+    "battlEyeRuntime": false,
+    "eacRuntime": false,
+    "language": "",
+    "beforeLaunchScriptPath": "",
+    "afterLaunchScriptPath": "",
+    "verboseLogs": true,
+    "advertiseAvxForRosetta": false,
+    "enableQuickSavesMenu": false,
+    "wineVersion": {
+      "bin": "/home/teo/.config/heroic/tools/proton/GE-Proton9-25-GTA/proton",
+      "name": "GE-Proton9-25-GTA",
+      "type": "proton"
+    },
+    "winePrefix": "/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes",
+    "wineCrossoverBottle": ""
+  },
+  "version": "v0",
+  "explicit": true
+}
