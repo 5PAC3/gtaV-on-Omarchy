@@ -2,85 +2,69 @@
 
 Repository to document and solve the issue of running GTA V (Windows/Epic Games version) on Linux using Heroic Games Launcher.
 
-## IMPORTANT: Edition and Heroic Version
-
-**GTA V Edition**: LEGACY EDITION (Standard), NOT Enhanced
-**Heroic Version**: 2.14.1 (outdated - needs update to 2.17+)
-
-## Current Status
-
-**TEST IN PROGRESS** - Heroic 2.19 (auto-fake epic) and manual CEF cache cleanup.
-
-## Update 2026
-
-According to official Heroic documentation (February 2026):
-- Starting from Heroic **2.17**, the entire GTA V/RDR2 installation process should be **AUTOMATIC**
-- The recommended method is:
-  1. Update Heroic to version >= 2.17
-  2. Set environment variable `USE_FAKE_EPIC_EXE=true` in game settings
-
-This bypasses the need for custom .bat or Python scripts.
-
 ## System Specifications
 
 - **Distro**: Omarchy (Arch-based)
 - **Window Manager**: Hyprland
 - **CPU**: Intel Core i5-10400F (12 cores) @ 4.30 GHz
 - **GPU**: NVIDIA GeForce GTX 1650 [Discrete]
-- **RAM**: 79.84 GiB / 230.87 GiB (35%)
-- **Heroic Version**: 2.14.1 (NEEDS UPDATE)
+- **RAM**: ~80 GB
+- **Heroic Version**: 2.20.1 ✓ (UP TO DATE)
 
-## What Has Been Tried
+## Current Configuration
 
-### 1. Rockstar Games Launcher
-- Launcher IS REQUIRED by GTA V (Epic version)
-- After manual install, launcher PARTIALLY works but game still fails
-- Errors: CEF crash, "Path Not Found", prerequisites failed
+- **targetExe**: PlayGTAV.exe (also tried GTA5.exe - same result)
+- **Proton**: GE-Proton9-27, GE-Proton9-26, GE-Proton-latest (all failed)
+- **USE_FAKE_EPIC_EXE**: true
+- **offlineMode**: false
+- **DXVK/VKD3D**: Auto-installed
 
-### 2. Error: Path Not Found (MAIN ISSUE)
-Wine drive paths (V:\...) don't match expected Windows paths. Working directory when .bat scripts run from Heroic/Proton is different than expected.
+## Game Details
 
-### 3. Proton Versions Tested
-All give "Path Not Found" error:
-- GE-Proton-latest
-- GE-Proton9-26
-- GE-Proton9-25-GTA (with GTA patch)
-- GE-Proton9-27
+- **Edition**: LEGACY EDITION (Standard)
+- **Store**: Epic Games
+- **Install Location**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTAV/`
+- **Wine Prefix**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes`
 
-### 4. Fix Files (Chronological)
+## What Was Tried
 
-| File | Description | Result |
-|------|------------|--------|
-| `fix.bat` (attempt 1) | PlayGTAV.exe -useEpic -fromRGL | Path not found |
-| `launch_wrapper.bat` | Launcher first, then game | Launcher install issues |
-| `fix_latest.bat` | Alternative ordering with ping | Various errors |
-| `launch_heroic.py` | Python wrapper attempt | Not tested |
+### Heroic (Official Method - Heroic 2.17+)
+1. Updated Heroic to 2.20.1 ✓
+2. Set `USE_FAKE_EPIC_EXE=true` ✓
+3. Used PlayGTAV.exe as target
+4. Tried multiple Proton versions: GE-Proton-latest, GE-Proton9-26, GE-Proton9-27
 
-### 5. Next Steps (Based on 2026 Docs)
-1. UPDATE Heroic to 2.17+ (currently on 2.14.1)
-2. Set only `USE_FAKE_EPIC_EXE=true`
-3. If fails, try Lutris
+### Result: FAILED
+All attempts crash with the same error:
+```
+wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
+```
 
-## Known Problems
+### Lutris
+- Installed Lutris
+- Tried multiple configurations
+- Same ucrtbase.dll error
 
-1. **Path Not Found Error**: Working directory issues with Proton
-2. **Launcher Crashes**: CEF browser in Rockstar Launcher
-3. **GTA Requires Launcher**: Game won't start without it
+## Root Cause
 
-## Quick Summary (3 Lines)
+The error `ucrtbase.dll._strerror_s` is an **unimplemented function in Wine**. This is a known limitation of Wine/Proton that cannot be easily fixed. The function `_strerror_s` is part of the Universal C Runtime (UCRT) and Wine doesn't implement it.
 
-Running GTA V on Linux with Epic + Heroic is complex because:
-1. Rockstar Launcher has issues with Wine/Proton (CEF crashes, path problems)
-2. The working directory mapping (V:\ vs C:\) breaks .bat scripts
-3. Solution: Update Heroic to 2.17+ for built-in automation
+## Solutions
 
-## References
+### 1. GTA V Steam Version (RECOMMENDED)
+The Steam version of GTA V works perfectly with Proton. This is the only reliable solution.
+- Cost: ~15-20€ on key shops
+- Works: 100% with Proton/Steam
+- GTA Online: Does NOT work on Linux (Battleye)
 
-- Heroic Wiki: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki/Rockstar-Games-from-Epic-Games
-- Official fix: USE_FAKE_EPIC_EXE=true (Heroic 2.17+)
-- Lutris as alternative
+### 2. Wait for Wine Fix
+This is a Wine bug that may be fixed in future versions. Monitor:
+- Wine GitHub issues
+- ProtonGE releases
 
-## Notes
+## Known Issues
 
-- GTA Online does NOT work on Linux (Battleye)
-- Only Story Mode is playable
+- **GTA Online**: Does NOT work on Linux (Battleye anti-cheat)
+- **Story Mode**: Should work with Steam version
+
+## Last Updated: April 2026
