@@ -21,34 +21,24 @@ A comprehensive guide to running GTA V (Epic Games Store - Legacy Edition) on Li
 
 ---
 
-# ✅ WORKING SOLUTION - April 2026
+# ⚠️ CURRENT STATUS: PARTIALLY WORKING
 
-## Problems Solved
+## What's Working ✅
 
-### 1. Heroic 2.20.1 Bug
-Heroic fails when trying to copy EpicGamesLauncher.exe:
-```
-ENOENT: copyfile '/opt/Heroic/resources/app.asar.unpacked/build/bin/x64/win32/EpicGamesLauncher.exe' -> ''
-```
-**Solution**: Bypass Heroic and launch directly with Proton.
+1. **Game launches** - GTA5.exe starts without crashing
+2. **No more _strerror_s error** - WINEDLLOVERRIDES=ucrtbase=b fixes this
+3. **Heroic bypass works** - Can launch game directly with Proton
+4. **fix.bat works** - Launches game through the chain Epic -> PlayGTAV -> GTA5
 
-### 2. ucrtbase.dll._strerror_s
-```
-wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
-```
-**Solution**: Use `WINEDLLOVERRIDES=ucrtbase=b` (built-in, not native DLL).
+## What's NOT Working ❌
 
-### 3. Rockstar Launcher Doesn't Detect Game
-The Rockstar Games Launcher doesn't detect GTA V and shows "Buy Now".
-**Solution**: Use fix.bat to launch GTA5.exe directly after opening PlayGTAV.
-
-### 4. Rockstar Login Modal
-After launching, Rockstar Games Launcher shows a login modal.
-**Solution**: The fix.bat approach should handle this, but you may need to log in once manually.
+1. **Activation required** - Game requires internet connection to activate
+2. **Rockstar Launcher rendering issues** - Launcher shows blank/blank with black borders
+3. **Social Club authentication** - Cannot complete online verification
 
 ---
 
-## Quick Start
+# Quick Start (Partial Solution)
 
 ### Prerequisites
 
@@ -89,68 +79,59 @@ Create a file named `fix.bat` in your game folder with this content:
 ```bat
 start "" EpicGamesLauncher.exe PlayGTAV.exe %*
 ping -n 30 localhost > nul
-start "" GTA5.exe -useEpic -fromRGL
+start "" GTA5.exe
+```
+
+### commandline.txt (for offline mode attempt)
+
+Create a file named `commandline.txt` in your game folder:
+
+```
+-scOfflineOnly
 ```
 
 ---
 
-## Step-by-Step Installation
+## Problems & Solutions Attempted
 
-### Step 1: Get EpicGamesLauncher.exe Fake
+### 1. Heroic 2.20.1 Bug ❌ FIXED
 
-Download from: https://github.com/Etaash-mathamsetty/heroic-epic-integration/releases
+Heroic fails when trying to copy EpicGamesLauncher.exe:
+```
+ENOENT: copyfile '.../EpicGamesLauncher.exe' -> ''
+```
+**Solution**: Bypass Heroic and launch directly with Proton.
 
-Place it in your GTA V game folder (where PlayGTAV.exe is located).
+### 2. ucrtbase.dll._strerror_s ❌ FIXED
 
-### Step 2: Create fix.bat
+```
+wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
+```
+**Solution**: Use `WINEDLLOVERRIDES=ucrtbase=b` (built-in, not native DLL).
 
-Create `fix.bat` in your game folder with the content shown above.
+### 3. Rockstar Launcher Doesn't Detect Game ❌ FIXED (Workaround)
 
-### Step 3: Create Launch Script
+The Rockstar Games Launcher doesn't detect GTA V and shows "Buy Now".
+**Solution**: Use fix.bat to launch GTA5.exe directly after opening PlayGTAV.
 
-Save the launch script above as `launch_gta.sh` and make it executable:
-```bash
-chmod +x launch_gta.sh
+### 4. Activation Required ❌ NOT FIXED
+
+```
+Activation requires an internet connection and you are currently in offline mode.
+Your offline activation data could not be loaded.
 ```
 
-Edit the paths to match your setup:
-- `WINEPREFIX`: Your Wine prefix path
-- `PROTON_PATH`: Path to GE-Proton10-34
-- `GAME_PATH`: Path to GTA V installation
+**Attempted solutions**:
+- Tried `-scOfflineOnly` flag - doesn't work
+- Tried `commandline.txt` with `-scOfflineOnly` - doesn't work
+- Tried launching Rockstar Launcher directly for login - Launcher renders blank
 
-### Step 4: First Launch
+**Cause**: GTA V requires initial online activation to verify license. Wine/Proton cannot complete this verification.
 
-1. Run the script: `./launch_gta.sh`
-2. The Rockstar Games Launcher will open
-3. **Log in with your Rockstar Social Club account** (only needed once)
-4. After logging in, the game should launch automatically
+### 5. Rockstar Launcher Rendering ❌ NOT FIXED
 
-If the game doesn't launch after login, run the script again.
-
-### Step 5: Enjoy!
-
-The game should now launch directly without the Rockstar login modal on subsequent runs.
-
----
-
-## Configuration Details
-
-### Environment Variables
-
-```bash
-WINEDLLOVERRIDES=ucrtbase=b    # Fixes _strerror_s error
-USE_FAKE_EPIC_EXE=true        # Enables fake Epic exe
-STEAM_COMPAT_DATA_PATH        # Wine prefix path
-STEAM_COMPAT_CLIENT_INSTALL_PATH  # Steam path (required by Proton)
-```
-
-### Why This Works
-
-1. **EpicGamesLauncher.exe fake**: Simulates the Epic Games Launcher
-2. **PlayGTAV.exe**: Launcher that triggers Rockstar Games Launcher
-3. **Wait 30 sec**: Gives time for Rockstar Launcher to initialize
-4. **GTA5.exe**: Launches the game directly with Epic flags
-5. **WINEDLLOVERRIDES=ucrtbase=b**: Fixes the ucrtbase.dll._strerror_s error
+The Rockstar Games Launcher shows a blank window or window with black borders.
+**Cause**: Unknown - possibly Wine graphics/UI rendering issues.
 
 ---
 
@@ -162,20 +143,16 @@ STEAM_COMPAT_CLIENT_INSTALL_PATH  # Steam path (required by Proton)
 - Verify EpicGamesLauncher.exe is in the game folder
 - Check that fix.bat has correct line endings (CRLF for Windows)
 
-### Rockstar Login Modal Appears Every Time
-
-- Log in manually once during the first launch
-- The credentials should be saved for future launches
-
 ### "ucrtbase.dll._strerror_s" Error
 
 - Make sure `WINEDLLOVERRIDES=ucrtbase=b` is set
 - The `b` means "built-in" - use Wine's internal implementation
 
-### Game Shows "Buy Now" in Rockstar Launcher
+### Activation Required Error
 
-- This is handled by fix.bat launching GTA5.exe directly
-- Make sure fix.bat is in the correct location
+This is a known limitation. The game requires online activation which cannot be completed in Wine/Linux.
+- The game has been purchased legitimately
+- Activation server connection may be blocked or not working in Wine
 
 ---
 
@@ -190,10 +167,28 @@ STEAM_COMPAT_CLIENT_INSTALL_PATH  # Steam path (required by Proton)
 
 ---
 
+## Known Issues
+
+1. **Initial online activation required** - Cannot be bypassed in current Wine version
+2. **Rockstar Launcher UI issues** - Blank/black rendering in Wine
+3. **Story Mode requires activation** - Even single-player needs online verification
+
+---
+
+## Future Debugging Ideas
+
+1. Try older Proton version (GE-Proton9-27)
+2. Try different Wine prefix settings
+3. Check if activation works on Windows (then copy activation files)
+4. Try VPN to bypass connection issues
+5. Check Wine registry for activation data
+
+---
+
 ## Limitations
 
 - **GTA Online**: ❌ Does NOT work (Battleye anti-cheat - no Linux support)
-- **Story Mode**: ✅ Works perfectly
+- **Story Mode**: ⚠️ Requires online activation (not yet working)
 
 ---
 
@@ -204,12 +199,18 @@ STEAM_COMPAT_CLIENT_INSTALL_PATH  # Steam path (required by Proton)
 - Epic Integration: https://github.com/Etaash-mathamsetty/heroic-epic-integration
 - Heroic Wiki: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki/Rockstar-Games-from-Epic-Games
 - Discord Support: https://discord.gg/HeroicGC
+- GTA Offline Mode: https://achivx.com/how-to-launch-gta-5-in-offline-mode/
 
 ---
 
 ## Changelog
 
-- **April 15, 2026**: Complete working solution
+- **April 15, 2026**: Documented current status
+  - Game launches but requires activation
+  - Rockstar Launcher has rendering issues
+  - Activation cannot be completed in Wine
+
+- **April 15, 2026**: Complete working solution (initial)
   - Heroic bypassed with manual script
   - fix.bat to launch game directly
   - WINEDLLOVERRIDES=ucrtbase=b
