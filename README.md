@@ -18,56 +18,72 @@ Repository to document and solve the issue of running GTA V (Windows/Epic Games 
 - **Install Location**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTAV/`
 - **Wine Prefix**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes`
 
-## Proton Versions Tested
+## PROBLEMA
 
-| Version | Result | Notes |
-|---------|--------|-------|
-| GE-Proton9-25-GTA | FAILED | `ucrtbase.dll._strerror_s` unimplemented |
-| GE-Proton9-26 | FAILED | `ucrtbase.dll._strerror_s` unimplemented |
-| GE-Proton9-27 | FAILED | `ucrtbase.dll._strerror_s` unimplemented |
-| **GE-Proton10-30** | **TESTING** | Based on Wine 10.x - more ucrtbase functions implemented |
-| **Proton-EM-10.0-34** | **READY** | EM builds sometimes work when others don't |
-
-## How to Install New Proton Versions
-
-### GE-Proton10-30
-```bash
-# Download from GitHub
-curl -L "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton10-30/GE-Proton10-30.tar.gz" -o GE-Proton10-30.tar.gz
-tar -xf GE-Proton10-30.tar.gz
-mv GE-Proton10-30 ~/.config/heroic/tools/proton/
-```
-
-### Proton-EM-10.0-34
-```bash
-# Download from GitHub
-curl -L "https://github.com/Etaash-mathamsetty/Proton/releases/download/EM-10.0-34/proton-EM-10.0-34.tar.xz" -o proton-EM-10.0-34.tar.xz
-tar -xf proton-EM-10.0-34.tar.xz
-mv proton-EM-10.0-34 ~/.config/heroic/tools/proton/
-```
-
-## Current Configuration (Active)
-
-- **Proton**: GE-Proton10-30
-- **targetExe**: PlayGTAV.exe
-- **USE_FAKE_EPIC_EXE**: true
-- **DXVK/VKD3D**: Auto-installed
-- **protonfixes**: GTAV fix included (removes SteamAppId env var)
-
-## Error (Old Proton Versions)
-
-All attempts with GE-Proton9-xx crash with:
 ```
 wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
 ```
 
-**Root Cause**: Wine/Proton 9.x doesn't implement `ucrtbase.dll._strerror_s`.
+**Causa**: Wine/Proton non implementa la funzione `_strerror_s` in `ucrtbase.dll`. È uno stub in tutte le versioni attuali di Wine (fino a Wine 10.x).
 
-**Solution**: Wine 10.x (Proton 10.x) has started implementing more ucrtbase functions.
+## SOLUZIONE: Compilare DLL Nativa
 
-## Known Issues
+Vedi **`GUIDE_ucrtbase_fix.md`** per la guida completa step-by-step.
+
+### Quick Summary
+
+1. **Scarica mingw-w64**: https://download.qt.io/development_releases/prebuilt/mingw_64/MinGW-w64-x86_64-11.2.0-release-posix-seh-rt_v9-rev1.7z
+
+2. **Compila la DLL** usando Proton come compilatore:
+```bash
+WINEPREFIX="$PREFIX" \
+STEAM_COMPAT_DATA_PATH="$PREFIX" \
+STEAM_COMPAT_CLIENT_INSTALL_PATH="$HOME/.local/share/.steam/steam" \
+"$PROTON_PATH/proton" run \
+"$MINGW_DIR/bin/x86_64-w64-mingw32-gcc.exe" \
+-shared \
+-o "$PREFIX/drive_c/windows/system32/ucrtbase.dll" \
+ucrtbase_override.c
+```
+
+3. **Configura Heroic** con:
+```json
+{
+  "enviromentOptions": [
+    { "key": "USE_FAKE_EPIC_EXE", "value": "true" },
+    { "key": "WINEDLLOVERRIDES", "value": "ucrtbase=n" }
+  ]
+}
+```
+
+4. **Copia EpicGamesLauncher.exe fake** nella cartella del gioco e nel prefix.
+
+## Proton Versions Tested
+
+| Version | Result | Notes |
+|---------|--------|-------|
+| GE-Proton9-25, 9-26, 9-27 | FAILED | `ucrtbase.dll._strerror_s` unimplemented |
+| GE-Proton10-30, 10-34 | FAILED | Still unimplemented in Wine 10.x |
+| Proton-EM-10.0-34 | FAILED | Still unimplemented |
+| **DLL Override** | **TESTING** | Compile native DLL with _strerror_s |
+
+## LIMITAZIONI
 
 - **GTA Online**: Does NOT work on Linux (Battleye anti-cheat, no Linux support)
-- **Story Mode**: Should work with working Proton version
+- **Story Mode**: Should work with DLL override
+
+## Files in this Repo
+
+- `ucrtbase_override.c` - C source code for _strerror_s implementation
+- `GUIDE_ucrtbase_fix.md` - Complete step-by-step guide
+- `gta_config.json` - Heroic config template
+- `fix.bat` - Launch wrapper script
+
+## Riferimenti
+
+- Wine Bug: https://bugs.winehq.org/show_bug.cgi?id=50031
+- ProtonGE: https://github.com/GloriousEggroll/proton-ge-custom
+- Epic Integration: https://github.com/Etaash-mathamsetty/heroic-epic-integration
+- Heroic Wiki: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki/Rockstar-Games-from-Epic-Games
 
 ## Last Updated: April 2026
