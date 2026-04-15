@@ -18,7 +18,19 @@ Repository to document and solve the issue of running GTA V (Windows/Epic Games 
 - **Install Location**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTAV/`
 - **Wine Prefix**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes`
 
-## PROBLEMA
+## ⚠️ SOLUZIONE FUNZIONANTE!
+
+Il gioco ora funziona! Vedi **`LAUNCH_SOLUTION.md`** per i dettagli.
+
+### Quick Fix
+
+Usa `WINEDLLOVERRIDES=ucrtbase=b` (built-in) invece di compilare DLL native.
+
+### Launch Script
+
+Vedi `launch_gta_manual.sh` - funziona bypassando Heroic.
+
+## PROBLEMA ORIGINALE
 
 ```
 wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
