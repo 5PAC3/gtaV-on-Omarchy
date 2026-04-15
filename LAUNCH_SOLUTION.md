@@ -1,12 +1,12 @@
 # GTA V Epic Games - Soluzione Funzionante
 
-## Soluzione: Launch Manuale con WINEDLLOVERRIDES=ucrtbase=b
+## Soluzione: Launch Manuale + fix.bat
 
-**NOTA**: Heroic 2.20.1 ha un bug che impedisce il lancio del gioco - fallisce cercando di copiare EpicGamesLauncher.exe fake. La soluzione è bypassare Heroic e lanciare direttamente con Proton.
+**NOTA**: Heroic 2.20.1 ha un bug che impedisce il lancio del gioco. La soluzione è bypassare Heroic e usare uno script fix.bat.
 
 ### Script di Launch
 
-Copia questo script in una posizione accessibile (es. `~/.local/bin/launch_gta.sh`):
+Copia `launch_gta_manual.sh` in una posizione accessibile (es. `~/.local/bin/launch_gta.sh`):
 
 ```bash
 #!/usr/bin/env bash
@@ -20,17 +20,30 @@ export GAME_PATH="/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTA
 export USE_FAKE_EPIC_EXE=true
 export WINEDLLOVERRIDES="ucrtbase=b"
 
+echo "Setting up Rockstar Games Launcher..."
+mkdir -p "$WINEPREFIX/drive_c/Program Files/Rockstar Games/Launcher"
+cp "$GAME_PATH/Redistributables/Rockstar-Games-Launcher.exe" "$WINEPREFIX/drive_c/Program Files/Rockstar Games/Launcher/Launcher.exe"
+
 cd "$GAME_PATH"
 
-"$PROTON_PATH/proton" run "PlayGTAV.exe" -useEpic -fromRGL "$@"
+"$PROTON_PATH/proton" run "fix.bat" "$@"
+```
+
+### fix.bat (deve essere nella cartella del gioco)
+
+```bat
+start "" EpicGamesLauncher.exe PlayGTAV.exe %*
+ping -n 30 localhost > nul
+start "" GTA5.exe -useEpic -fromRGL
 ```
 
 ### Spiegazione
 
-La chiave è `WINEDLLOVERRIDES=ucrtbase=b`:
-- `b` = built-in: usa la DLL ucrtbase inclusa in Wine/Proton
-
-**NON** usare `ucrtbase=n` (native) - non funziona perché la DLL custom compilata è malformata/incompatibile.
+1. **EpicGamesLauncher.exe fake**: Simula l'Epic Games Launcher
+2. **PlayGTAV.exe**: Launcher che avvia il Rockstar Games Launcher  
+3. **wait 30 sec**: Lascia tempo al Rockstar Launcher di avviarsi
+4. **GTA5.exe**: Avvia il gioco direttamente con flag Epic
+5. **WINEDLLOVERRIDES=ucrtbase=b**: Risolve l'errore `_strerror_s`
 
 ### Funziona!
 
