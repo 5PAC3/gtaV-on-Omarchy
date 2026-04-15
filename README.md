@@ -9,7 +9,8 @@ Repository to document and solve the issue of running GTA V (Windows/Epic Games 
 - **CPU**: Intel Core i5-10400F (12 cores) @ 4.30 GHz
 - **GPU**: NVIDIA GeForce GTX 1650 [Discrete]
 - **RAM**: 16 GB
-- **Heroic Version**: 2.20.1 ✓ (UP TO DATE)
+- **Heroic Version**: 2.20.1
+- **Proton**: GE-Proton10-34
 
 ## Game Details
 
@@ -18,78 +19,109 @@ Repository to document and solve the issue of running GTA V (Windows/Epic Games 
 - **Install Location**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/GTAV/`
 - **Wine Prefix**: `/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes`
 
-## ⚠️ SOLUZIONE FUNZIONANTE!
+---
 
-Il gioco ora funziona! Vedi **`LAUNCH_SOLUTION.md`** per i dettagli.
+# ✅ SOLUZIONE FUNZIONANTE - 15 Aprile 2026
 
-### Quick Fix
+## Problemi Risolti
 
-Usa `WINEDLLOVERRIDES=ucrtbase=b` (built-in) invece di compilare DLL native.
+### 1. Heroic 2.20.1 Bug
+Heroic fallisce cercando di copiare EpicGamesLauncher.exe:
+```
+ENOENT: copyfile '/opt/Heroic/resources/app.asar.unpacked/build/bin/x64/win32/EpicGamesLauncher.exe' -> ''
+```
+**Soluzione**: Bypassare Heroic e lanciare direttamente con Proton.
 
-### Launch Script
-
-Vedi `launch_gta_manual.sh` - funziona bypassando Heroic.
-
-## PROBLEMA ORIGINALE
-
+### 2. ucrtbase.dll._strerror_s
 ```
 wine: Call from 00006FFFFFC1CF57 to unimplemented function ucrtbase.dll._strerror_s, aborting
 ```
+**Soluzione**: Usare `WINEDLLOVERRIDES=ucrtbase=b` (built-in, non native DLL).
 
-**Causa**: Wine/Proton non implementa la funzione `_strerror_s` in `ucrtbase.dll`. È uno stub in tutte le versioni attuali di Wine (fino a Wine 10.x).
+### 3. Rockstar Launcher Non Rileva il Gioco
+Il Rockstar Games Launcher non detecta GTA V e mostra "Buy Now".
+**Soluzione**: Usare fix.bat che lancia GTA5.exe direttamente dopo aver aperto PlayGTAV.
 
-## SOLUZIONE: Compilare DLL Nativa
+---
 
-Vedi **`GUIDE_ucrtbase_fix.md`** per la guida completa step-by-step.
+## Quick Start
 
-### Quick Summary
-
-1. **Scarica mingw-w64**: https://download.qt.io/development_releases/prebuilt/mingw_64/MinGW-w64-x86_64-11.2.0-release-posix-seh-rt_v9-rev1.7z
-
-2. **Compila la DLL** usando Proton come compilatore:
+### 1. Copia lo script di launch
 ```bash
-WINEPREFIX="$PREFIX" \
-STEAM_COMPAT_DATA_PATH="$PREFIX" \
-STEAM_COMPAT_CLIENT_INSTALL_PATH="$HOME/.local/share/.steam/steam" \
-"$PROTON_PATH/proton" run \
-"$MINGW_DIR/bin/x86_64-w64-mingw32-gcc.exe" \
--shared \
--o "$PREFIX/drive_c/windows/system32/ucrtbase.dll" \
-ucrtbase_override.c
+cp /tmp/gtaV-on-Omarchy/launch_gta_manual.sh ~/.local/bin/launch_gta.sh
+chmod +x ~/.local/bin/launch_gta.sh
 ```
 
-3. **Configura Heroic** con:
-```json
-{
-  "enviromentOptions": [
-    { "key": "USE_FAKE_EPIC_EXE", "value": "true" },
-    { "key": "WINEDLLOVERRIDES", "value": "ucrtbase=n" }
-  ]
-}
+### 2. Esegui il gioco
+```bash
+~/.local/bin/launch_gta.sh
 ```
 
-4. **Copia EpicGamesLauncher.exe fake** nella cartella del gioco e nel prefix.
+---
+
+## File Necessari
+
+### fix.bat (deve essere nella cartella del gioco)
+```bat
+start "" EpicGamesLauncher.exe PlayGTAV.exe %*
+ping -n 30 localhost > nul
+start "" GTA5.exe -useEpic -fromRGL
+```
+
+### EpicGamesLauncher.exe
+Scaricato da: https://github.com/Etaash-mathamsetty/heroic-epic-integration/releases/download/v0.4/EpicGamesLauncher.exe
+Copiato in: cartella del gioco
+
+### Rockstar Games Launcher
+Già presente in: `GTAV/Redistributables/Rockstar-Games-Launcher.exe`
+Copiato in: `$WINEPREFIX/drive_c/Program Files/Rockstar Games/Launcher/Launcher.exe`
+
+---
+
+## Configurazione Script
+
+Variabili d'ambiente necessarie:
+```bash
+export WINEDLLOVERRIDES="ucrtbase=b"       # Risolve errore _strerror_s
+export USE_FAKE_EPIC_EXE=true               # Abilita fake Epic exe
+export STEAM_COMPAT_DATA_PATH="$WINEPREFIX"
+export STEAM_COMPAT_CLIENT_INSTALL_PATH="$HOME/.local/share/steam"
+```
+
+---
 
 ## Proton Versions Tested
 
 | Version | Result | Notes |
 |---------|--------|-------|
-| GE-Proton9-25, 9-26, 9-27 | FAILED | `ucrtbase.dll._strerror_s` unimplemented |
-| GE-Proton10-30, 10-34 | FAILED | Still unimplemented in Wine 10.x |
-| Proton-EM-10.0-34 | FAILED | Still unimplemented |
-| **DLL Override** | **TESTING** | Compile native DLL with _strerror_s |
+| GE-Proton9-25, 9-26, 9-27 | ❌ | `ucrtbase.dll._strerror_s` unimplemented |
+| GE-Proton10-30, 10-34 | ✅ | Funziona con WINEDLLOVERRIDES=ucrtbase=b |
+| Proton-EM-10.0-34 | ❌ | Still unimplemented |
 
-## LIMITAZIONI
+---
 
-- **GTA Online**: Does NOT work on Linux (Battleye anti-cheat, no Linux support)
-- **Story Mode**: Should work with DLL override
+## Limitationi
 
-## Files in this Repo
+- **GTA Online**: ❌ Non funziona (Battleye anti-cheat)
+- **Story Mode**: ✅ Funziona
 
-- `ucrtbase_override.c` - C source code for _strerror_s implementation
-- `GUIDE_ucrtbase_fix.md` - Complete step-by-step guide
-- `gta_config.json` - Heroic config template
-- `fix.bat` - Launch wrapper script
+---
+
+## Cronologia Fix
+
+- **15 Apr 2026**: Soluzione completa funzionante
+  - Heroic bypassato con script manuale
+  - fix.bat per lanciare il gioco direttamente
+  - WINEDLLOVERRIDES=ucrtbase=b
+
+- **14 Apr 2026**: Scoperto errore ucrtbase.dll
+  - Compilata DLL nativa (non funziona)
+  - Trovato fix con built-in DLL
+
+- **13 Apr 2026**: Identificato bug Heroic 2.20.1
+  - CopyFile fallisce con percorso vuoto
+
+---
 
 ## Riferimenti
 
@@ -97,5 +129,4 @@ ucrtbase_override.c
 - ProtonGE: https://github.com/GloriousEggroll/proton-ge-custom
 - Epic Integration: https://github.com/Etaash-mathamsetty/heroic-epic-integration
 - Heroic Wiki: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki/Rockstar-Games-from-Epic-Games
-
-## Last Updated: April 2026
+- Discord Support: https://discord.gg/HeroicGC
