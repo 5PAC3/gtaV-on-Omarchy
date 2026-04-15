@@ -8,7 +8,7 @@ Repository to document and solve the issue of running GTA V (Windows/Epic Games 
 - **Window Manager**: Hyprland
 - **CPU**: Intel Core i5-10400F (12 cores) @ 4.30 GHz
 - **GPU**: NVIDIA GeForce GTX 1650 [Discrete]
-- **RAM**: ~80 GB
+- **RAM**: 16 GB
 - **Heroic Version**: 2.20.1 ✓ (UP TO DATE)
 
 ## Current Configuration
