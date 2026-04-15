@@ -31,8 +31,8 @@
     "advertiseAvxForRosetta": false,
     "enableQuickSavesMenu": false,
     "wineVersion": {
-      "bin": "/home/teo/.config/heroic/tools/proton/GE-Proton9-25-GTA/proton",
-      "name": "GE-Proton9-25-GTA",
+      "bin": "/home/teo/.config/heroic/tools/proton/GE-Proton10-30/proton",
+      "name": "GE-Proton10-30",
       "type": "proton"
     },
     "winePrefix": "/run/media/teo/370787c0-3b29-4394-8a39-2e0ffd9f87b2/heroic/prefixes",
