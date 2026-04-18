@@ -186,6 +186,13 @@ STEAM_COMPAT_CLIENT_INSTALL_PATH    # Required by Proton
 
 # CHANGELOG
 
+- **April 18, 2026**: Additional attempts to bypass activation
+  - Tried Faugus wine prefix (instead of Heroic default)
+  - Rockstar Launcher works but game still requires authentication session
+  - Tried registry entries, symlinks, same-session launch - all failed
+  - Game sees launcher as separate process, not authenticated session
+  - Root cause: game validates session via Rockstar server
+
 - **April 15, 2026**: Complete working solution (waiting for Windows activation)
   - Heroic bypassed with manual script
   - fix.bat launches game through Rockstar Launcher
